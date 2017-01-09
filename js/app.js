@@ -21521,7 +21521,21 @@
 	    function App(props) {
 	        _classCallCheck(this, App);
 
-	        return _possibleConstructorReturn(this, (App.__proto__ || Object.getPrototypeOf(App)).call(this, props));
+	        var _this = _possibleConstructorReturn(this, (App.__proto__ || Object.getPrototypeOf(App)).call(this, props));
+
+	        _this.state = {
+	            data: {
+	                "0": { name: "Category A", description: "category a" },
+	                "00": { name: "Subcategory C", description: "subcategory c" },
+	                "000": { name: "Item 0", description: "item 0" },
+	                "01": { name: "Item 1", description: "item 1" },
+	                "02": { name: "Item 2", description: "item 2" },
+	                "1": { name: "Category B", description: "category b" },
+	                "10": { name: "Item 3", description: "item 3" },
+	                "2": { name: "Category A", description: "category a" }
+	            }
+	        };
+	        return _this;
 	    }
 
 	    _createClass(App, [{
@@ -21530,7 +21544,7 @@
 	            return _react2.default.createElement(
 	                'div',
 	                null,
-	                _react2.default.createElement(_treeTable2.default, null)
+	                _react2.default.createElement(_treeTable2.default, { data: this.state.data })
 	            );
 	        }
 	    }]);
@@ -21570,13 +21584,111 @@
 	    function TreeTable(props) {
 	        _classCallCheck(this, TreeTable);
 
-	        return _possibleConstructorReturn(this, (TreeTable.__proto__ || Object.getPrototypeOf(TreeTable)).call(this, props));
+	        var _this = _possibleConstructorReturn(this, (TreeTable.__proto__ || Object.getPrototypeOf(TreeTable)).call(this, props));
+
+	        var keys = Object.keys(props.data).sort();
+	        _this.state = {
+	            keys: keys,
+	            headers: Object.keys(props.data[keys[0]]),
+	            status: {}
+	        };
+	        _this.getRowStyle = _this.getRowStyle.bind(_this);
+	        _this.toggleStatus = _this.toggleStatus.bind(_this);
+	        _this.getStatus = _this.getStatus.bind(_this);
+	        _this.hasChildren = _this.hasChildren.bind(_this);
+	        return _this;
 	    }
 
 	    _createClass(TreeTable, [{
+	        key: 'getStatus',
+	        value: function getStatus(key) {
+	            return this.state.status[key.substring(0, key.length - 1)];
+	        }
+	    }, {
+	        key: 'getRowStyle',
+	        value: function getRowStyle(key) {
+	            return key.length < 2 ? null : this.getStatus(key) ? null : { display: 'none' };
+	        }
+	    }, {
+	        key: 'hasChildren',
+	        value: function hasChildren(key) {
+	            return undefined != this.props.data[key + '0'];
+	        }
+	    }, {
+	        key: 'toggleStatus',
+	        value: function toggleStatus(key) {
+	            var status = this.state.status;
+	            if (undefined == this.state.status[key]) {
+	                status[key] = true;
+	            } else {
+	                status[key] = !status[key];
+	                if (false == status[key]) {
+	                    Object.keys(status).filter(function (v, i) {
+	                        return v.substring(0, key.length) == key;
+	                    }).forEach(function (v, i) {
+	                        return status[v] = false;
+	                    });
+	                }
+	            }
+	            this.setState({ status: status });
+	        }
+	    }, {
 	        key: 'render',
 	        value: function render() {
-	            return _react2.default.createElement('div', null);
+	            var _this2 = this;
+
+	            return _react2.default.createElement(
+	                'div',
+	                null,
+	                _react2.default.createElement(
+	                    'table',
+	                    null,
+	                    _react2.default.createElement(
+	                        'thead',
+	                        null,
+	                        _react2.default.createElement(
+	                            'tr',
+	                            null,
+	                            this.state.headers.map(function (k, i) {
+	                                return _react2.default.createElement(
+	                                    'th',
+	                                    { key: i },
+	                                    k
+	                                );
+	                            })
+	                        )
+	                    ),
+	                    _react2.default.createElement(
+	                        'tbody',
+	                        null,
+	                        this.state.keys.map(function (key, index) {
+	                            return _react2.default.createElement(
+	                                'tr',
+	                                { key: index, style: _this2.getRowStyle(key) },
+	                                Object.keys(_this2.props.data[key]).map(function (k, i) {
+	                                    return _react2.default.createElement(
+	                                        'td',
+	                                        { key: i },
+	                                        0 == i ? _react2.default.createElement(
+	                                            'div',
+	                                            { style: { paddingLeft: key.length * 10 } },
+	                                            _react2.default.createElement(
+	                                                'a',
+	                                                { href: 'javascript:void(0)', onClick: function onClick() {
+	                                                        return _this2.toggleStatus(key);
+	                                                    } },
+	                                                _this2.hasChildren(key) ? _this2.state.status[key] ? '-' : '+' : null
+	                                            ),
+	                                            ' ',
+	                                            _this2.props.data[key][k]
+	                                        ) : _this2.props.data[key][k]
+	                                    );
+	                                })
+	                            );
+	                        })
+	                    )
+	                )
+	            );
 	        }
 	    }]);
 
